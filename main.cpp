@@ -119,10 +119,7 @@ int main()
 
                 if (act == 1)
                 {
-                    // --- PERBAIKAN DI SINI ---
-                    // Memanggil fungsi playImmediate yang baru kita buat
                     player.playImmediate(*s);
-                    // -------------------------
                 }
                 else if (act == 2)
                 {
@@ -161,12 +158,18 @@ int main()
                 player.display();
             system("pause");
         }
+
         else if (m == 4)
         {
             cout << "\n=== PLAYLIST MANAGER ===" << endl;
-            cout << "1. Buat Playlist Baru\n2. Tambah Lagu ke Playlist\n3. Putar Playlist\n4. Lihat Daftar Playlist\n>> ";
+            cout << "1. Buat Playlist Baru" << endl;
+            cout << "2. Tambah Lagu ke Playlist" << endl;
+            cout << "3. Putar Playlist" << endl;
+            cout << "4. Lihat Daftar Playlist" << endl;
+            cout << ">> ";
             int pl;
             cin >> pl;
+
             if (pl == 1)
             {
                 cout << "Nama Playlist Baru: ";
@@ -178,19 +181,49 @@ int main()
             else if (pl == 2)
             {
                 playlist.display();
-                cout << "Masukkan Nama Playlist: ";
+                cout << "Masukkan Nama Playlist tujuan: ";
                 cin.ignore();
                 string n;
                 getline(cin, n);
-                cout << "Masukkan Judul Lagu: ";
-                string t;
-                getline(cin, t);
 
-                Song *s = musicLib.searchSong(t);
-                if (s)
-                    playlist.addSong(n, *s);
+                Song *targetSong = nullptr;
+
+                // --- LOGIC CERDAS: Cek Global Current Song ---
+                if (globalCurrentSong != nullptr)
+                {
+                    cout << "\nSedang memutar: " << globalCurrentSong->title << endl;
+                    cout << "[1] Masukkan lagu yang sedang diputar ini?" << endl;
+                    cout << "[2] Cari judul lagu lain" << endl;
+                    cout << ">> ";
+                    int pick;
+                    cin >> pick;
+                    if (pick == 1)
+                    {
+                        targetSong = globalCurrentSong;
+                    }
+                }
+                // ---------------------------------------------
+
+                // Jika user memilih cari judul lain atau tidak ada lagu yang diputar
+                if (targetSong == nullptr)
+                {
+                    cout << "Masukkan Judul Lagu: ";
+                    if (globalCurrentSong != nullptr)
+                        cin.ignore(); // Bersihkan buffer jika tadi input angka
+                    string t;
+                    getline(cin, t);
+                    targetSong = musicLib.searchSong(t);
+                }
+
+                // Eksekusi penambahan
+                if (targetSong)
+                {
+                    playlist.addSong(n, *targetSong);
+                }
                 else
-                    cout << "Lagu tidak ada di library." << endl;
+                {
+                    cout << "Lagu tidak ditemukan / Batal." << endl;
+                }
             }
             else if (pl == 3)
             {
@@ -210,9 +243,20 @@ int main()
         else if (m == 5)
         {
             fav.display();
-            cout << "\n[1] Putar Lagu Favorit (by Nomor) | [0] Back: ";
+
+            cout << "\n-----------------------------" << endl;
+            cout << "[1] Putar Lagu Favorit (by Nomor)" << endl;
+
+            if (globalCurrentSong != nullptr)
+            {
+                cout << "[2] Tambahkan '" << globalCurrentSong->title << "' ke Favorit" << endl;
+            }
+
+            cout << "[0] Kembali" << endl;
+            cout << ">> ";
             int fc;
             cin >> fc;
+
             if (fc == 1)
             {
                 cout << "Nomor urut: ";
@@ -227,6 +271,11 @@ int main()
                 else
                     cout << "Nomor salah." << endl;
             }
+            else if (fc == 2 && globalCurrentSong != nullptr)
+            {
+                fav.add(*globalCurrentSong); // Langsung add tanpa ngetik
+            }
+            system("pause");
         }
         else if (m == 6)
         {
