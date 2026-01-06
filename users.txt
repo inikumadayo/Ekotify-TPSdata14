@@ -1,0 +1,2 @@
+123|kuma|isekai|12|0
+admin|Administrator|Kantor Admin|01-01-2000|1
